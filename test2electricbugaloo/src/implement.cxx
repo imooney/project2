@@ -1,7 +1,7 @@
 //  implement.cxx
 //  Created by Isaac Mooney on 3/1/17.
 
-#include "test_vecNd.h"
+#include "vecNd.h"
 #include <iostream>
 
 using namespace std;

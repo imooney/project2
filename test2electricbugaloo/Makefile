@@ -68,12 +68,12 @@ $(BDIR)/% : $(ODIR)/%.o
 ###############################################################################
 ############################# Main Targets ####################################
 ###############################################################################
-all : $(BDIR)/test_matrix
+all : $(BDIR)/matrix
 
-$(ODIR)/test_vecNd.o : $(SDIR)/test_vecNd.cxx $(SDIR)/test_vecNd.h
-$(ODIR)/matrixMM.o : $(SDIR)/test_matrix.cxx $(SDIR)/matrixMM.cxx $(SDIR)/matrixMM.h $(ODIR)/test_vecNd.o
+$(ODIR)/vecNd.o : $(SDIR)/vecNd.cxx $(SDIR)/vecNd.h
+$(ODIR)/matrixNM.o : $(SDIR)/matrix.cxx $(SDIR)/matrixNM.cxx $(SDIR)/matrixNM.h $(ODIR)/vecNd.o
 
-$(BDIR)/test_matrix : $(ODIR)/matrixMM.o $(ODIR)/test_vecNd.o
+$(BDIR)/matrix : $(ODIR)/matrixNM.o $(ODIR)/vecNd.o
 
 ###############################################################################
 ##################################### MISC ####################################
