@@ -60,6 +60,14 @@ matrixNM::matrixNM(const matrixNM & copy) {
 
 //~~~~~~~~~~~~~~~~~~~~~~OVERLOADED OPERATORS~~~~~~~~~~~~~~~~~~~~~~
 
+vecNd & matrixNM::operator [] (const int & index) {
+    if (index < 0 || index >= col_size) {
+        cout << "mat brak" << endl;
+        cerr << "Out of bounds. Exiting.\n"; exit(1);
+    }
+    return matrix[index];
+}
+
 //overloaded assignment operator
 matrixNM & matrixNM::operator = (const matrixNM & eq) {
     if (this == & eq) {
@@ -111,7 +119,7 @@ matrixNM & matrixNM::operator - (const matrixNM & subtract) {
     return *res;
 }
 
-//overloaded *= operator
+//overloaded *= (scalar) operator
 matrixNM & matrixNM::operator *= (const double & scale) {
     for (unsigned i = 0; i < col_size; ++ i) {
         matrix[i] *= scale;
@@ -119,7 +127,7 @@ matrixNM & matrixNM::operator *= (const double & scale) {
     return *this;
 }
 
-//overloaded * operator
+//overloaded * (scalar) operator
 matrixNM & matrixNM::operator * (const double & scale) {
     matrixNM * res = new matrixNM(row_size, col_size);
     for (unsigned i = 0; i < col_size; ++ i) {
@@ -128,7 +136,7 @@ matrixNM & matrixNM::operator * (const double & scale) {
     return *res;
 }
 
-//overloaded /= operator
+//overloaded /= (scalar) operator
 matrixNM & matrixNM::operator /= (const double & scale) {
     for (unsigned i = 0; i < col_size; ++ i) {
         matrix[i] /= scale;
@@ -136,13 +144,29 @@ matrixNM & matrixNM::operator /= (const double & scale) {
     return *this;
 }
 
-//overloaded / operator
+//overloaded / (scalar) operator
 matrixNM & matrixNM::operator / (const double & scale) {
     matrixNM * res = new matrixNM(row_size, col_size);
     for (unsigned i = 0; i < col_size; ++ i) {
         res->matrix[i] = matrix[i]/(double)scale;
     }
     return *res;
+}
+
+//overloaded * (matrix) operator
+matrixNM & matrixNM::operator * (const matrixNM & mult) {
+    if (row_size != mult.col_size) {
+        cerr << "Dimensions incorrect for matrix multiplication. Exiting.\n"; exit(1);
+    }
+    matrixNM * prod = new matrixNM(mult.row_size, col_size);
+    for (unsigned l = 0; l < mult.row_size; ++ l) {
+        for (unsigned k = 0; k < col_size; ++ k) {
+            for (unsigned j = 0; j < row_size; ++ j) {
+                prod->matrix[k][l] += matrix[k][j] * mult.matrix[j][l];
+            }
+        }
+    }
+    return *prod;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~MEMBER FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~
@@ -177,7 +201,7 @@ void matrixNM::row_swap(const int & row1, const int & row2) {
 //swaps two columns with each other
 void matrixNM::col_swap(const int & col1, const int & col2) {
     double temp = -99999;
-    for (int i = 0; i < col_size; ++ i) {
+    for (unsigned i = 0; i < col_size; ++ i) {
         temp = matrix[i][col1];
         matrix[i][col1] = matrix[i][col2];
         matrix[i][col2] = temp;
@@ -188,7 +212,7 @@ void matrixNM::col_swap(const int & col1, const int & col2) {
 //returns identity matrix of given size
 matrixNM & matrixNM::Id(const int & dim) {
     matrixNM * id = new matrixNM(dim);
-    for (int i = 0; i < dim; ++ i) {
+    for (unsigned i = 0; i < dim; ++ i) {
         id->matrix[i][i] = 1;
     }
     return *id;

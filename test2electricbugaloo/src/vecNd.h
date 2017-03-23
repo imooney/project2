@@ -23,7 +23,7 @@ public:
     
     //overloaded operators
     vecNd & operator = (const vecNd &);
-    double & operator [] (const int);
+    double & operator [] (const int) const;
     vecNd & operator += (const vecNd &);
     vecNd & operator -= (const vecNd &);
     vecNd & operator + (const vecNd &);
@@ -41,6 +41,19 @@ public:
     double cross2D(const vecNd &);
     vecNd & cross3D(const vecNd &);
     int Size() const {return size;}
+    double Get (const int & index) const {
+        if (index < 0 || index >= size) {
+            std::cerr << "Out of bounds. Exiting.\n"; exit(1);
+        }
+        return vec[index];
+    }
+    void Set(const int & index, const double & num) {
+        if (index < 0 || index >= size) {
+            std::cerr << "Out of bounds. Exiting.\n"; exit(1);
+        }
+        vec[index] = num;
+        return;
+    }
 };
 
 #endif /* vecNd_h */

@@ -97,8 +97,15 @@ int main() {
     rowswap_test(test_mat);
     colswap_test(test_mat);
     
+    //identity matrix test
     matrixNM test = matrixNM::Id(5); test.Print();
+    //bracket test at vecNd class level
+    test[0].Print(); cout << '\n';
     
+    //here we go
+    test_mat[0] = test_mat[2] * test_mat[3]; test_mat[0].Print();
+    test_mat[0] = test_mat[5] * test_mat[3];
+    test_mat[0].Print();
 
     delete def_test; def_test = NULL;
     delete num_test; num_test = NULL;

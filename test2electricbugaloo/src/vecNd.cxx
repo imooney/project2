@@ -60,7 +60,7 @@ vecNd & vecNd::operator = (const vecNd & eq) {
     return *this;
 }
 
-double & vecNd::operator [] (const int index) {
+double & vecNd::operator [] (const int index) const {
     if (index < 0 || index >= size) {
         cerr << "Out of bounds. Exiting.\n"; exit(1);
     }

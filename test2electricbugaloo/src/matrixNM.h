@@ -23,6 +23,7 @@ public:
     ~matrixNM() {}; // destructor
 
     //overloaded operators
+    vecNd & operator [] (const int &);
     matrixNM & operator = (const matrixNM &);
     matrixNM & operator += (const matrixNM &);
     matrixNM & operator -= (const matrixNM &);
@@ -32,13 +33,14 @@ public:
     matrixNM & operator * (const double &);
     matrixNM & operator / (const double &);
     matrixNM & operator /= (const double &);
+    matrixNM & operator * (const matrixNM &); //matrix multiplication
     
     //member functions
     void sizecheck(const matrixNM &); // ensures matrices in operation are compatible
     void Print(); // prints the matrix to the stream
     double Size() { return row_size*col_size;} // gets the number of elements
     // gets a particular element at position ij
-    double Get(const int col, const int row) {
+    double Get(const int col, const int row) const {
         if ((col >= 0 && col < col_size) && (row >= 0 && row < row_size)) {
             return matrix[col][row];
         }
