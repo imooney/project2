@@ -3,12 +3,12 @@
 
 #include <iostream>
 #include <cmath>
+#include <iomanip>
 #include "vecNd.h"
 #include "matrixNM.h"
-
 using namespace std;
 
-//~~~~~~~~~~~~~~~~~~~~CONSTRUCTORS~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~CONSTRUCTORS~~~~~~~~~~~~~~~~~~~~//
 
 vecNd::vecNd() {
     size = 3;
@@ -44,7 +44,7 @@ vecNd::vecNd(const vecNd & copy) {
 }
 
 
-//~~~~~~~~~~~~~~~~~~~~OVERLOADED OPERATORS~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~OVERLOADED OPERATORS~~~~~~~~~~~~~~~~~~~~//
 
 
 vecNd & vecNd::operator = (const vecNd & eq) {
@@ -145,7 +145,7 @@ vecNd & vecNd::operator /= (const double & s) {
 }
 
 
-//~~~~~~~~~~~~~~~~~~~~MEMBER FUNCTIONS~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~MEMBER FUNCTIONS~~~~~~~~~~~~~~~~~~~~//
 
 
 void vecNd::sizecheck(const vecNd & v) {
@@ -158,9 +158,9 @@ void vecNd::sizecheck(const vecNd & v) {
 void vecNd::Print() {
     cout << "(";
     for (unsigned i = 0; i < size - 1; ++ i) {
-        cout << vec[i] << "\t";
+        cout << setw(10) << vec[i];
     }
-    cout << vec[size - 1] << ")\n";
+    cout << setw(10) << vec[size - 1] << setw(10) << ")\n";
     return;
 }
 

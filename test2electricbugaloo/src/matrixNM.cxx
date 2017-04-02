@@ -2,10 +2,11 @@
 //  Created by Isaac Mooney on 3/15/17.
 
 #include "matrixNM.h"
+#include <cmath>
 
 using namespace std;
 
-//~~~~~~~~~~~~~~~~~~~~~~CONSTRUCTORS~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~CONSTRUCTORS~~~~~~~~~~~~~~~~~~~~~~//
 
 //default constructor
 matrixNM::matrixNM() {
@@ -58,11 +59,10 @@ matrixNM::matrixNM(const matrixNM & copy) {
     }
 }
 
-//~~~~~~~~~~~~~~~~~~~~~~OVERLOADED OPERATORS~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~OVERLOADED OPERATORS~~~~~~~~~~~~~~~~~~~~~~//
 
 vecNd & matrixNM::operator [] (const int & index) {
     if (index < 0 || index >= col_size) {
-        cout << "mat brak" << endl;
         cerr << "Out of bounds. Exiting.\n"; exit(1);
     }
     return matrix[index];
@@ -154,6 +154,10 @@ matrixNM & matrixNM::operator / (const double & scale) {
 }
 
 //overloaded * (matrix) operator
+//I am aware that there exist algorithms which cut down the computational complexity
+//to O(n^2.3) or so, rather than O(n^3). However, most of these algorithms tend to
+//be memory intensive, so I just stuck with the naïve algorithm which works fine
+//for small matrices. So, run this on large matrices at your own peril.
 matrixNM & matrixNM::operator * (const matrixNM & mult) {
     if (row_size != mult.col_size) {
         cerr << "Dimensions incorrect for matrix multiplication. Exiting.\n"; exit(1);
@@ -169,7 +173,24 @@ matrixNM & matrixNM::operator * (const matrixNM & mult) {
     return *prod;
 }
 
-//~~~~~~~~~~~~~~~~~~~~~~MEMBER FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~
+//overloaded * (matrix) operator
+matrixNM & matrixNM::operator *= (const matrixNM & mult) {
+    if (row_size != mult.col_size) {
+        cerr << "Dimensions incorrect for matrix multiplication. Exiting.\n"; exit(1);
+    }
+    matrixNM * prod = new matrixNM(mult.row_size, col_size);
+    for (unsigned l = 0; l < mult.row_size; ++ l) {
+        for (unsigned k = 0; k < col_size; ++ k) {
+            for (unsigned j = 0; j < row_size; ++ j) {
+                prod->matrix[k][l] += matrix[k][j] * mult.matrix[j][l];
+            }
+        }
+    }
+    *this = *prod;
+    return *this;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~MEMBER FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~//
 
 
 //checks that the matrices being compared are the same size
@@ -190,23 +211,21 @@ void matrixNM::Print() {
 }
 
 //swaps two rows with each other
-void matrixNM::row_swap(const int & row1, const int & row2) {
-    vecNd * temp = new vecNd();
-    *temp = matrix[row1];
-    matrix[row1] = matrix[row2];
-    matrix[row2] = *temp;
-    return;
+matrixNM & matrixNM::row_swap(const int & row1, const int & row2) {
+    matrixNM * rowswap = new matrixNM(*this);
+    rowswap->matrix[row1] = matrix[row2];
+    rowswap->matrix[row2] = matrix[row1];
+    return *rowswap;
 }
 
 //swaps two columns with each other
-void matrixNM::col_swap(const int & col1, const int & col2) {
-    double temp = -99999;
+matrixNM & matrixNM::col_swap(const int & col1, const int & col2) {
+    matrixNM * colswap = new matrixNM(*this);
     for (unsigned i = 0; i < col_size; ++ i) {
-        temp = matrix[i][col1];
-        matrix[i][col1] = matrix[i][col2];
-        matrix[i][col2] = temp;
+        colswap->matrix[i][col1] = matrix[i][col2];
+        colswap->matrix[i][col2] = matrix[i][col1];
     }
-    return;
+    return *colswap;
 }
 
 //returns identity matrix of given size
@@ -218,3 +237,134 @@ matrixNM & matrixNM::Id(const int & dim) {
     return *id;
 }
 
+//returns transpose
+matrixNM & matrixNM::transpose() {
+    matrixNM * trans = new matrixNM(*this);
+    for (unsigned i = 0; i < col_size; ++ i) {
+        for (unsigned j = 0; j < i; ++ j) {
+            trans->matrix[i][j] = matrix[j][i];
+            trans->matrix[j][i] = matrix[i][j];
+        }
+    }
+    return *trans;
+}
+
+//returns matrix with column subtracted from original
+matrixNM & matrixNM::col_delete(const int & col) {
+    matrixNM * narrow = new matrixNM(row_size - 1, col_size);
+    for (unsigned i = 0; i < col; ++ i) {
+        for (int j = 0; j < col_size; ++ j) {
+            narrow->matrix[j][i] = matrix[j][i];
+        }
+    }
+    for (unsigned i = col + 1; i < row_size; ++ i) {
+        for (int j = 0; j < col_size; ++ j) {
+            narrow->matrix[j][i - 1] = matrix[j][i];
+        }
+    }
+    return *narrow;
+}
+
+//returns matrix with row subtracted from original
+matrixNM & matrixNM::row_delete(const int & row) {
+    matrixNM * squash = new matrixNM(row_size, col_size - 1);
+    for (unsigned i = 0; i < row; ++ i) {
+        squash->matrix[i] = matrix[i];
+    }
+    for (unsigned i = row + 1; i < col_size; ++ i) {
+        squash->matrix[i - 1] = matrix[i];
+    }
+    return *squash;
+}
+
+//adds multiple of one row to another
+matrixNM & matrixNM::row_add_other(const int & row1, const int & row2, const double & scale) {
+    matrixNM * rowadd = new matrixNM(*this);
+    rowadd->matrix[row1] += matrix[row2]*scale;
+    return *rowadd;
+}
+
+//adds multiple of one col to another
+matrixNM & matrixNM::col_add_other(const int & col1, const int & col2, const double & scale) {
+    matrixNM * coladd = new matrixNM(*this);
+    for (unsigned i = 0; i < col_size; ++ i) {
+        coladd->matrix[i][col1] += matrix[i][col2]*scale;
+    }
+    return *coladd;
+}
+
+//assigns a matrix of size - 1 to the bottom right corner of the larger matrix.
+void matrixNM::assign_subset(const matrixNM & other) {
+    for (unsigned i = 1; i < col_size; ++ i) {
+        for (unsigned j = 1; j < row_size; ++ j) {
+            matrix[i][j] = other.matrix[i-1][j-1];
+        }
+    }
+}
+
+//turns the given matrix into an upper triangular one with the same determinant
+//via elementary row operations:
+//  (a): Swapping rows flips the sign of the determinant
+//  (b): Adding a multiple of one row to another leaves the determinant unchanged
+//  (c): Multiplying a row by a constant multiplies the determinant by that constant
+matrixNM & matrixNM::upper_triangularize() {
+    double row_zero = -1, row_nonzero = -1;
+    int counter = 0;
+    if (row_size == 1) {
+        return *this;
+    }
+    for (unsigned i = 0; i < col_size; ++ i) {
+        if (matrix[i][0] == 0) {
+            row_zero = i;
+            ++ counter;
+        }
+        else {
+            row_nonzero = i;
+        }
+    }
+    matrixNM *mini = new matrixNM();
+    if (counter == col_size) {
+        *mini = row_delete(0);
+        *mini = mini->col_delete(0);
+        assign_subset(mini->upper_triangularize());
+    }
+    else {
+        if (matrix[0][0] == 0) {
+            *this = row_swap(0, row_nonzero);
+            matrix[0] *= -1;
+            *mini = *this;
+        }
+        else {
+            *mini = *this;
+        }
+        for (unsigned i = 1; i < col_size - 1; ++ i) {
+            if (matrix[i][0] != 0) {
+                *this = row_add_other(i, row_nonzero, -matrix[i][0]/matrix[row_nonzero][0]);
+            }
+        }
+        *this = row_add_other(row_nonzero, 0, -matrix[row_nonzero][0]/matrix[0][0]);
+        *mini = row_delete(0);
+        *mini = mini->col_delete(0);
+        assign_subset(mini->upper_triangularize());
+    }
+}
+
+//calculates the determinant by upper triangularizing (a copy of) the matrix,
+//then recognizing that the determinant of an upper triangular matrix is just
+//the product of its diagonal entries, returning that result as the determinant.
+double matrixNM::determinant() {
+    if (row_size != col_size) {
+        cerr << "The determinant is only defined for square matrices. Exiting.\n"; exit(1);
+    }
+    matrixNM * detmat = new matrixNM(*this);
+    detmat->upper_triangularize();
+    double det = 1;
+    for (unsigned i = 0; i < row_size; ++ i) {
+        det *= detmat->matrix[i][i];
+    }
+    return det;
+}
+
+matrixNM & matrixNM::inverse() {
+    return *this;
+}
